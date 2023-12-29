@@ -5,7 +5,7 @@ from db import stores, items
 
 app = Flask(__name__)
 
-@app.get("/store") 
+@app.get("/storez") 
 def get_stores():
     return { "stores": stores }
 
