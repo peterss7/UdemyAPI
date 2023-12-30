@@ -1,8 +1,10 @@
-import uuid
 from flask.views import MethodView
 from flask_smorest import abort, Blueprint
-from db import stores
-from schemas import StoreSchema, StoreUpdateSchema
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+
+from db import db
+from models import StoreModel
+from schemas import StoreSchema
 
 
 blp = Blueprint("stores", __name__)
@@ -22,15 +24,6 @@ class Store(MethodView):
             return "Store Deleted", 204
         except KeyError:
             abort(404, message="Store not found")
-            
-    @blp.arguments(StoreUpdateSchema)
-    def put(self, store_data, store_id):
-        try:
-            store = stores[store_id]
-            store |= store_data
-            return store
-        except KeyError:
-            abort(404, message="Store not found")
 
 @blp.route("/store")
 class StoreList(MethodView):
@@ -41,12 +34,13 @@ class StoreList(MethodView):
     @blp.arguments(StoreSchema)
     @blp.response(201, StoreSchema)
     def post(self, store_data):
-
-        for store in stores.values():
-            if store_data["name"] == store["name"] and store:
-                abort(404, message="Store already exists")
+        store = StoreModel(**store_data)        
+        try:
+            db.session.add(store)
+            db.session.commit()
+        except IntegrityError:
+            abort(400, message="Store already exists")
+        except SQLAlchemyError:
+            abort(500, message="Could not add store to database")
         
-        store_id = uuid.uuid4().hex
-        store = { **store_data, "id": store_id }
-        stores[store_id] = store
         return store
