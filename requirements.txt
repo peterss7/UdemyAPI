@@ -1,9 +1,3 @@
-<<<<<<< HEAD
 flask
-flask-smorest
+flask_smorest
 python-dotenv
-=======
-flask
-flask-smorest
-python-dotenv
->>>>>>> origin/master

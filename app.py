@@ -5,11 +5,11 @@ from db import stores, items
 
 app = Flask(__name__)
 
-@app.get("/storez") 
+@app.get("/stores") 
 def get_stores():
-    return { "stores": stores }
+    return {"stores": list(stores.values()) }
 
-@app.get( "/item") 
+@app.get( "/items") 
 def get_items():
     return { "items": list(items.values()) }
 
@@ -17,15 +17,15 @@ def get_items():
 def create_store():
     store_data = request.get_json()
     store_id = uuid.uuid4().hex
-
     if (
         "name" not in store_data
-        or "store_id" not in store_data
+        
     ):
+        print('bad request')
         abort(400, message="Missing data. Store Name and store id are required.")
     
     for store in stores.values():
-        if store_data["name"] == store["name"]:
+        if store_data["name"] == store["name"] and store:
             abort(404, message="Store already exists")
     
     store = { **store_data, "id": store_id }
@@ -33,7 +33,7 @@ def create_store():
     return store, 201
 
 @app.post("/item")
-def create_item(store_id): 
+def create_item(): 
     item_data = request.get_json()
     if item_data["store_id"] not in stores:
         abort(404, message="Store not found")
@@ -53,6 +53,18 @@ def get_store(store_id):
 def get_item(item_id):
     try:
         return items[item_id]
+    except KeyError:
+        abort(404, message="Item not found")
+    
+@app.put("/item/<string:item_id>")    
+def update_item(item_id):
+    item_data = request.get_json()
+    if item_data["store_id"] not in stores:
+        abort(404, message="Store not found")
+    try:
+        item = items[item_id]
+        item.update(item_data)
+        return item
     except KeyError:
         abort(404, message="Item not found")
     
