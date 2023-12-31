@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask.views import MethodView
 from flask_smorest import abort, Blueprint
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from db import db
 from models import ItemModel, StoreModel, TagModel
@@ -26,6 +26,8 @@ class TagsInStore(MethodView):
         try:
             db.session.add(tag)
             db.session.commit()
+        except IntegrityError as e:
+            abort(409, message="Tag already linked to store")
         except SQLAlchemyError as e:
             abort(500, message=str(e))
         return tag
@@ -42,7 +44,7 @@ class LinkTagsToItem(MethodView):
         try:
             db.session.add(item)
             db.session.commit()
-        except SQLAlchemyError as e:
+        except SQLAlchemyError as e: 
             abort(500, message=str(e))
         
         return tag  
