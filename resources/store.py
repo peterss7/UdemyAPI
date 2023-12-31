@@ -22,6 +22,13 @@ class Store(MethodView):
         db.session.commit()
         return "Message: Store deleted", 200
 
+@blp.route("/store/<string:store_id>/item")
+class ItemsInStore(MethodView):
+    @blp.response(200, StoreSchema)
+    def get(self, store_id):
+        store = StoreModel.query.get_or_404(store_id)
+        return store.items.all()
+
 @blp.route("/store")
 class StoreList(MethodView):
     @blp.response(200, StoreSchema(many=True))
