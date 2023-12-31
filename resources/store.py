@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 
 from db import db
 from models import StoreModel
-from schemas import StoreSchema
+from schemas import ItemSchema, StoreSchema
 
 
 blp = Blueprint("stores", __name__)
@@ -24,7 +24,7 @@ class Store(MethodView):
 
 @blp.route("/store/<string:store_id>/item")
 class ItemsInStore(MethodView):
-    @blp.response(200, StoreSchema)
+    @blp.response(200, ItemSchema(many=True)) 
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
         return store.items.all()
