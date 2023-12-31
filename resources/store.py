@@ -9,7 +9,7 @@ from schemas import ItemSchema, StoreSchema
 
 blp = Blueprint("stores", __name__)
 
-@blp.route("/store/<string:store_id>")
+@blp.route("/store/<int:store_id>")
 class Store(MethodView):
     @blp.response(200, StoreSchema)
     def get(self, store_id):
@@ -22,7 +22,7 @@ class Store(MethodView):
         db.session.commit()
         return "Message: Store deleted", 200
 
-@blp.route("/store/<string:store_id>/item")
+@blp.route("/store/<int:store_id>/item")
 class ItemsInStore(MethodView):
     @blp.response(200, ItemSchema(many=True)) 
     def get(self, store_id):
